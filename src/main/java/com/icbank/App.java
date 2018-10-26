@@ -1,4 +1,4 @@
-package com.icbank.app;
+package com.icbank;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

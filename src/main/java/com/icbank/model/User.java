@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 public class User extends BaseEntity {
 
@@ -44,6 +46,30 @@ public class User extends BaseEntity {
 	@Column
 	@NotNull
 	private BigDecimal cash;
+
+	@Column(nullable = false)
+	@Type(type = "org.hibernate.type.NumericBooleanType")
+	private boolean enabled;
+
+	@Column
+	@NotNull
+	private String role;
+
+	public boolean isEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getRole() {
+		return role;
+	}
+
+	public void setRole(String role) {
+		this.role = role;
+	}
 
 	public BigDecimal getCash() {
 		return cash;
