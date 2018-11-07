@@ -11,6 +11,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableWebSecurity
 @EnableSwagger2
 @EntityScan(basePackages = { "com.icbank.model" })
+//@ComponentScan(basePackages = { "com.icbank.controller", "com.icbank.configuration" })
 public class App {
 
 	public static void main(String[] args) {

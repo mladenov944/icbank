@@ -1,6 +1,7 @@
 package com.icbank.service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -35,6 +36,8 @@ public class UserService extends BaseService implements UserDetailsService {
 		tempUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		tempUser.setEnabled(true);
 		tempUser.setRole("ROLE_USER");
+		tempUser.setCreatedDate(LocalDate.now());
+		;
 		getEm().persist(tempUser);
 		return tempUser;
 
@@ -44,12 +47,27 @@ public class UserService extends BaseService implements UserDetailsService {
 	public User login(String username, String password) {
 
 		BCryptPasswordEncoder bCryptPasswordEncoder = new BCryptPasswordEncoder();
-		String kriptnata = bCryptPasswordEncoder.encode(password);
 		User temp = (User) loadUserByUsername(username);
-		if (bCryptPasswordEncoder.matches(password, kriptnata)) {
+		if (bCryptPasswordEncoder.matches(password, temp.getPassword())) {
 			return temp;
 		}
 		throw new UsernameNotFoundException("Wrong username or password! ");
+	}
+
+	public boolean transfer(Long id, BigDecimal amount, String iban) {
+
+		User sender = (User) findByID(id);
+		User receiver = (User) findByIban(iban);
+		if (receiver == null) {
+			throw new UsernameNotFoundException("Wrong IBAN !");
+		}
+
+		if (sender.getCash().compareTo(amount) >= 0) {
+			sender.setCash(sender.getCash().subtract(amount));
+			receiver.setCash(receiver.getCash().add(amount));
+			return true;
+		}
+		throw new UsernameNotFoundException("Not enough cash!");
 	}
 
 	@Override
@@ -61,11 +79,23 @@ public class UserService extends BaseService implements UserDetailsService {
 			throw new UsernameNotFoundException("Username " + username + " not found.");
 		}
 
+//		Collection<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
+//		authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+
+//		return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(),
+//				user.isEnabled(), true, true, true, authorities);
+
 		return user;
 	}
 
-	public User findByID(long id) {
-		return getEm().find(User.class, id);
-
+	public User findByID(Long id) {
+		return getEm().createQuery("Select u from User u where u.id = :pId", User.class).setParameter("pId", id)
+				.getSingleResult();
 	}
+
+	public User findByIban(String iban) {
+		return getEm().createQuery("Select u from User u where u.iban = :pIban", User.class).setParameter("pIban", iban)
+				.getSingleResult();
+	}
+
 }
